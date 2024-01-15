@@ -8,11 +8,21 @@ api_platform:
         jsonopenapi: ['application/vnd.openapi+json']
         html: ['text/html']
     defaults:
+        pagination_enabled: false
+        pagination_items_per_page: 30
+        pagination_client_enabled: true
+        pagination_client_items_per_page: true
+        
         stateless: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
         extra_properties:
             standard_put: true
             rfc_7807_compliant_errors: true
+    
+    collection:
+        pagination:
+            items_per_page_parameter_name: 'count' 
+
     event_listeners_backward_compatibility_layer: false
     keep_legacy_inflector: false
