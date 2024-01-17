@@ -24,5 +24,10 @@ services:
     # please note that last definitions always *replace* previous ones
 
 # Ici, on le fait à la main, au sinon, c'est privé, ici on le fait de manière "privée"
-App\Controller\InvoiceIncrementationController:
-   public: true
+    App\Controller\InvoiceIncrementationController:
+      public: true
+
+    App\Serializer\PatchedDateTimeNormalizer:
+        tags: [Serializer.normalizer]
+
+

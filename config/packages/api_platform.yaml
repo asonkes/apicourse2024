@@ -25,5 +25,6 @@ api_platform:
         pagination:
             items_per_page_parameter_name: 'count' 
 
-    event_listeners_backward_compatibility_layer: false
+# On change le "false" en "true", pour que ma plateform lise les "api"
+    event_listeners_backward_compatibility_layer: true
     keep_legacy_inflector: false
