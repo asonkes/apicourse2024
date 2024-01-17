@@ -2,8 +2,6 @@
 
 namespace App\Entity;
 
-// Et donc ici, on l'a importé, on importe 
-// #[ApiResource()]
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use ApiPlatform\Metadata\ApiResource;
@@ -24,11 +22,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['users_read', 'customers_read', 'invoices_read'])]
+    #[Groups(['users_read', 'customers_read', 'invoices_read', 'invoices_subresource'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['users_read', 'customers_read'])]
+    #[Groups(['users_read', 'customers_read', 'invoices_read', 'invoices_subresource'])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -42,11 +40,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['users_read', 'customers_read', 'invoices_read'])]
+    #[Groups(['users_read', 'customers_read', 'invoices_read', 'invoices_subresource'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['users_read', 'customers_read', 'invoices_read'])]
+    #[Groups(['users_read', 'customers_read', 'invoices_read', 'invoices_subresource'])]
     private ?string $lastName = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Customer::class, orphanRemoval: true)]
@@ -172,6 +170,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeCustomer(Customer $customer): static
     {
+
         if ($this->customers->removeElement($customer)) {
             // set the owning side to null (unless already changed)
             if ($customer->getUser() === $this) {

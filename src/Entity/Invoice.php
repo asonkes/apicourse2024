@@ -2,15 +2,20 @@
 
 namespace App\Entity;
 
-// Et donc ici, on l'a importé, on importe 
-// #[ApiResource()]
-
+use App\Entity\Customer;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Post;
 use Doctrine\DBAL\Types\Types;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Delete;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\InvoiceRepository;
-use ApiPlatform\Doctrine\Odm\Filter\OrderFilter;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: InvoiceRepository::class)]
@@ -20,42 +25,66 @@ use Symfony\Component\Serializer\Annotation\Groups;
     order: ['amount' => 'asc'],
     normalizationContext: [
         'groups' => ['invoices_read']
+    ],
+    operations: [
+        new Get(),
+        new Post(),
+        new GetCollection(),
+        new Put(),
+        new Delete(),
+        new Patch()
     ]
 )]
-// Order sur quand ça été envoyé = senAt
+#[ApiResource(
+    uriTemplate: '/customers/{id}/invoices',
+    uriVariables: [
+        'id' => new Link(fromClass: Customer::class, fromProperty: 'invoices')
+    ],
+    operations: [new GetCollection()],
+    normalizationContext: [
+        'groups' => ['invoices_subresource']
+    ],
+)]
 #[ApiFilter(OrderFilter::class, properties: ["amount", "sentAt"])]
-
 class Invoice
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['invoices_read', 'customers_read'])]
+    #[Groups(['invoices_read', 'customers_read', 'invoices_subresource'])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['invoices_read', 'customers_read'])]
+    #[Groups(['invoices_read', 'customers_read', 'invoices_subresource'])]
     private ?float $amount = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['invoices_read', 'customers_read'])]
+    #[Groups(['invoices_read', 'customers_read', 'invoices_subresource'])]
     private ?\DateTimeInterface $sentAt = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['invoices_read', 'customers_read'])]
+    #[Groups(['invoices_read', 'customers_read', 'invoices_subresource'])]
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'invoices')]
     #[ORM\JoinColumn(nullable: false)]
-
-    // On doit pas l'afficher, au sinon boucle infinie...
-    // #[Groups(['invoices_read', 'customers_read'])]
     #[Groups(['invoices_read'])]
     private ?Customer $customer = null;
 
     #[ORM\Column]
-    #[Groups(['invoices_read'])]
+    #[Groups(['invoices_read', 'invoices_subresource'])]
     private ?int $chrono = null;
+
+    /**
+     * Permet de récup le user à qui appartient finalement la facture
+     *
+     * @return User
+     */
+    #[Groups(['invoices_read', 'invoices_subresource'])]
+    public function getUser(): User
+    {
+        return $this->customer->getUser();
+    }
 
     public function getId(): ?int
     {

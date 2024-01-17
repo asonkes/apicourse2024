@@ -2,23 +2,35 @@
 
 namespace App\Entity;
 
-// Et donc ici, on l'a importé, on importe 
-// #[ApiResource()]
-
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Delete;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\CustomerRepository;
+use ApiPlatform\Metadata\GetCollection;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use Doctrine\Common\Collections\ArrayCollection;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\Link;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 #[ApiResource(
     normalizationContext: [
         'groups' => ['customers_read']
+    ],
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(),
+        new Put(),
+        new Delete,
+        new Patch()
     ]
 )]
 #[ApiFilter(SearchFilter::class, properties: [
@@ -32,8 +44,6 @@ class Customer
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-
-    // Permet de voir les liaisons "invoices_read" ==> quadn je lis les "invoices" etc
     #[Groups(['customers_read', 'invoices_read', 'users_read'])]
     private ?int $id = null;
 
@@ -46,7 +56,6 @@ class Customer
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
-    // 
     #[Groups(['customers_read', 'invoices_read', 'users_read'])]
     private ?string $email = null;
 
@@ -68,18 +77,25 @@ class Customer
         $this->invoices = new ArrayCollection();
     }
 
+    /**
+     * Permet de récup le total des invoices
+     *
+     * @return float
+     */
     #[Groups('customers_read')]
-    public function getToteldAmount(): float
+    public function getTotalAmount(): float
     {
-        return round(array_reduce(
-            $this->invoices->toArray(),
-            function ($total, $invoice) {
-                return $total + $invoice->getAmount();
-            },
-            0
-        ), 2);
+        return round(array_reduce($this->invoices->toArray(), function ($total, $invoice) {
+            return $total + $invoice->getAmount();
+        }, 0), 2);
     }
 
+    /**
+     * Permet de récup le montant total non payé des factures
+     *
+     * @return float
+     */
+    #[Groups('customers_read')]
     public function getUnpaidAmount(): float
     {
         return round(array_reduce(
