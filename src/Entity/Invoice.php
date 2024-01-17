@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\InvoiceRepository;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use App\Controller\InvoiceIncrementationController;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: InvoiceRepository::class)]
@@ -29,6 +30,17 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new Get(),
         new Post(),
+        // Donc là, on refait un "post" mais on met des propriétés...
+        new Post(
+            // Donc là, on incrémente la facture...
+            controller: InvoiceIncrementationController::class,
+            uriTemplate: './invoices/{id}/Increment',
+            name: 'Increment',
+            openapiContext: [
+                'summary' => "Incrémente une facture",
+                'description' => "Incrémente le chrono d'une facture donnée"
+            ]
+        ),
         new GetCollection(),
         new Put(),
         new Delete(),
