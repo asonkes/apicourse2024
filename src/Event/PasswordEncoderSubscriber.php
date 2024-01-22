@@ -19,13 +19,13 @@ class PasswordEncoderSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            KernelEvents::VIEW => ['encodePassword', EventPriorities::PRE_WRITE]
+            KernelEvents::VIEW => ['encodePassword', EventPriorities::PRE_WRITE] // avant écriture === PRE_WHITE
         ];
     }
 
     public function encodePassword(ViewEvent $event)
     {
-        $user = $event->getControllerResult(); // permet de récup l'objet désérialisé
+        $user = $event->getControllerResult(); // permet de récup l'objet désérialisé(l'objet complet de mon élément)
         $method = $event->getRequest()->getMethod(); // permet de récup la méthode (GET, POST, ...)
 
         /* Comme il va toujours se faire au kernel VIEW */
